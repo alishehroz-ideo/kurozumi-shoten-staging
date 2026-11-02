@@ -62,6 +62,8 @@
   .kzgb-title-lives b{color:#fff0d3;font-size:11px;margin-left:4px}
   .kzgb-clear{margin:10px 0 0;font-size:11px;line-height:1.7;color:#f0ce86;white-space:pre-line}
   .kzgb-clear[hidden]{display:none}
+  .kzgb-pause{margin:2px 0 0;font-size:11px;line-height:1.7;color:#f0ce86}
+  .kzgb-pause[hidden]{display:none}
   .kzgb-clear button{display:block;margin:8px auto 0}
   .kzgb-dialog{width:min(420px,calc(100vw - 24px))}
   .kzgb-dialog p{white-space:pre-line;font-size:13px;line-height:1.9;margin:0 0 6px}
@@ -232,8 +234,9 @@
   // taller than the board, so their もう一度 / ステージ一覧 are cut off (their page as delivered too), and the GameBull
   // line adds one more line. The whole panel is then scaled down to the board's height, centred as theirs: same
   // design, same proportions, every button on the board and tappable.
-  function fitPanel() {
-    const veil = el('finish'), pc = veil.querySelector('.panel-content');
+  // Also their 一時停止 panel, which gets the GameBull time line below.
+  function fitPanel(id = 'finish') {
+    const veil = el(id), pc = veil.querySelector('.panel-content');
     pc.style.transform = ''; pc.style.transformOrigin = '';
     if (veil.hidden) return;
     const need = pc.offsetHeight, have = veil.clientHeight - 8;
@@ -243,9 +246,9 @@
     const k = have / need, top = (veil.clientHeight - need * k) / 2 - pc.offsetTop;
     pc.style.transformOrigin = '50% 0';
     pc.style.transform = `translateY(${top.toFixed(1)}px) scale(${k.toFixed(3)})`;
-    log(`Their finish panel (${need} px) scaled to the board (${have} px).`);
+    log(`Their ${id} panel (${need} px) scaled to the board (${have} px).`);
   }
-  addEventListener('resize', fitPanel);
+  addEventListener('resize', () => { fitPanel(); fitPanel('pausePanel'); });
   let report = null; // { attemptId, stage, state: sending | ok | failed | final }
   async function send(r) {
     r.state = 'sending'; setLine('GameBullに記録しています…');
@@ -290,11 +293,22 @@
       { label: 'もう一度挑戦する', primary: true, run: () => load(index) },
       { label: 'タイトルへ', run: () => showTitle() }]);
   }
+  // Their 一時停止 stops their own clock, but not GameBull's: the server measures an attempt from its start to the
+  // clear report (gamebull-whitelabel stage-clear.service.ts, elapsedWholeSeconds(session.startedAt, now); the
+  // playTimeMs sent is only stored). A timer frozen on pause would show time the server no longer gives, so their
+  // pause panel says so, with the time left (QA 2026-11-02: "pause karne par bhi timer chal raha hai").
+  const pauseLine = document.createElement('p');
+  pauseLine.className = 'kzgb-pause'; pauseLine.hidden = true;
+  el('resume').before(pauseLine);
   setInterval(() => {
     const a = cur && cur.stage === index + 1 ? gb().attempt(cur.attemptId) : null;
     const on = !!(a && !won && !a.clearBody && !a.result);
     const left = on ? gb().remainingMs(a.attemptId) : 0;
     timer.hidden = !on || left > 600000;
+    const was = pauseLine.hidden;
+    pauseLine.hidden = !on || el('pausePanel').hidden;
+    if (!pauseLine.hidden) pauseLine.textContent = 'GameBullの制限時間は一時停止中も進みます（残り ' + fmt(left) + '）';
+    if (was !== pauseLine.hidden) fitPanel('pausePanel');
     if (!on) return;
     timer.textContent = '残り ' + fmt(left);
     timer.classList.toggle('kzgb-low', left <= 60000);
