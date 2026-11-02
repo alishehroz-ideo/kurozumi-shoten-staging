@@ -366,6 +366,40 @@
   addEventListener('resize', KZFit);
   KZFit();
 
+  /* ── their own display, fixed from outside (QA 2026-11-02 on iPhone, IMG_6699 / 6700 / 6702; their page as delivered
+   * shows the same). Nothing of theirs is removed; their files are unchanged.
+   *  - The 「☾ 真夜中のドーナツパズル / — 全600ステージ —」 heading is 49 px tall (more with iPhone's Mincho), but in
+   *    windows up to 700 px tall (the GameBull app's) their night.css makes its row 34 px, so it spills over the line
+   *    their row draws on top: the row takes its content's height (the board gives the difference).
+   *  - Their 一手戻す / やり直す icons are the text characters ↩ / ↻, which iPhone's font draws low and right in their
+   *    round buttons: the same arrows drawn as lines, centred, in their colour (#f2ddb6); the characters stay as the
+   *    buttons' text (transparent), their circle, sizes and disabled look unchanged.
+   *  - 遊び方: the ドーナツとゴール icon is empty (their night.css sets .legend-player{background:none}; the day picture
+   *    it replaced, --bakery-hero, is not in their build): their own donut from their sprite sheet (#donutAssets,
+   *    sprite 1, their bounds), the one the board draws. */
+  {
+    const svg = d => `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='#f2ddb6' stroke-width='2.3' stroke-linecap='round' stroke-linejoin='round'>${d}</svg>`)}")`;
+    const fix = document.createElement('style'); fix.id = 'kzgb-client-fixes';
+    fix.textContent = `
+    aside{flex:0 0 auto!important;height:auto!important}
+    #undo>span,#reset>span{position:relative;color:transparent!important;text-shadow:none!important}
+    #undo>span::after,#reset>span::after{content:'';position:absolute;inset:0;background:center/56% no-repeat}
+    #undo>span::after{background-image:${svg("<path d='M9 14 4 9l5-5'/><path d='M4 9h10.5a5.5 5.5 0 0 1 0 11H11'/>")}}
+    #reset>span::after{background-image:${svg("<path d='M20.5 12a8.5 8.5 0 1 1-2.49-6.01L20.5 8.5'/><path d='M20.5 3.5v5h-5'/>")}}`;
+    document.head.appendChild(fix);
+    try {
+      const da = JSON.parse(document.querySelector('#donutAssets').textContent), b = da.bounds && da.bounds[1], im = new Image();
+      im.onload = () => {
+        if (!b) return;
+        const c = document.createElement('canvas'), S = 96, k = Math.min(S / b[2], S / b[3]);
+        c.width = c.height = S;
+        c.getContext('2d').drawImage(im, b[0], b[1], b[2], b[3], (S - b[2] * k) / 2, (S - b[3] * k) / 2, b[2] * k, b[3] * k);
+        fix.textContent += `.help-legend .legend-player{background:url(${c.toDataURL()}) center/contain no-repeat!important;border:0!important;border-radius:0!important}`;
+      };
+      im.src = da.atlas;
+    } catch (e) { log('Legend donut not drawn: ' + e.message); }
+  }
+
   /* ── start-up: GameBull's progress first; a launch that cannot play says so ── */
   const progress = p => { try { window.parent.gbLoaderProgress && window.parent.gbLoaderProgress(p); } catch { /* not in our frame */ } };
   let signalled = false, pageLoaded = document.readyState === 'complete', checked = false;

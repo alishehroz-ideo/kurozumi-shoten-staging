@@ -412,4 +412,4 @@ function showTitle(){if(!won&&!paused)pause(true);$('#titleScreen').hidden=false
 $('#startGame').onclick=()=>{$('#titleScreen').hidden=true;document.body.classList.remove('at-title');for(const el of document.querySelectorAll('body>header,body>main,body>footer'))el.inert=false;if(paused)pause(false);NightAudio.setPaused('title',false);NightAudio.unlock().then(()=>NightAudio.fx('click',.6));canvas.focus({preventScroll:true});};
 document.querySelector('.brand').onclick=e=>{e.preventDefault();showTitle()};
 showTitle();
-</script><script src="gb/kz-env.js?v=2"></script><script src="gb/kz-host.js?v=2"></script><script src="gb/kz-hooks.js?v=2"></script></body></html>
+</script><script src="gb/kz-env.js?v=3"></script><script src="gb/kz-host.js?v=3"></script><script src="gb/kz-hooks.js?v=3"></script></body></html>
