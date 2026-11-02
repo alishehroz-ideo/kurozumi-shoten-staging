@@ -1,0 +1,31 @@
+<!doctype html>
+<!-- 黒墨商店 厚木店 — 真夜中のドーナツパズル, GameBull web build (Stage Mode). This page is the host-facing shell:
+     - the loading page (Unity IdeofuzionBridge template behaviour, playbook section 7): blurred backdrop baked from
+       the client's night art, spinner, tenant icon from /context (gameLogoUrl, then gameBannerUrl) with the 4 s / 30 s
+       clocks, the client's icon as the built-in one;
+     - a fixed window filling the whole page (safe areas excepted) holding the game frame (app.html, same launch URL);
+       their page runs in it at scale 1, scaled down only below their 560 px minimum height (loader.ts fitFrame), so
+       the game never scrolls;
+     - the gamebull:close relay (trap W18). -->
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#081426">
+<title>黒墨商店 真夜中のドーナツパズル</title>
+<link rel="icon" type="image/png" href="./gb/favicon-CIYLU5Yr.png">
+  <script type="module" crossorigin src="./gb/index-CEDOSfGx.js"></script>
+  <link rel="stylesheet" crossorigin href="./gb/index-D9ab_ByB.css">
+</head>
+<body>
+<div id="gb-box"><iframe id="gb-frame" title="真夜中のドーナツパズル" allow="autoplay; fullscreen; clipboard-write"></iframe></div>
+<div id="gb-loading">
+  <div id="unity-loading-bar">
+    <div id="unity-logo"><div id="gb-tenant-logo"></div><div id="gb-spinner"></div></div>
+    <div id="unity-progress-bar-empty"><div id="unity-progress-bar-full"></div></div>
+    <div id="unity-progress-percent">0%</div>
+  </div>
+</div>
+</body>
+</html>
